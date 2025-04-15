@@ -17,9 +17,11 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #ffe082 0%, #ffd54f 100%);
+  color: #6d4c00;
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  margin: 0;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -31,8 +33,13 @@ body {
 }
 
 a {
-  color: inherit;
+  color: #6d4c00;
   text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #ffb300;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,95 +1,28 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import styles from './page.module.css';
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <main className={styles.main} style={{ background: 'linear-gradient(135deg, #ffe082 0%, #ffd54f 100%)', minHeight: '100vh', color: '#6d4c00' }}>
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <h1 style={{ fontFamily: 'Comic Sans MS, Comic Sans, cursive', fontSize: '3rem', marginBottom: '1rem' }}>Remembering Tensor</h1>
+        <p style={{ fontSize: '1.3rem', marginBottom: '2rem' }}>
+          Celebrating the life and joy of our beloved Tensor. Share your memories, photos, and stories below.
+        </p>
+        <img
+          src="/family.jpg"
+          alt="Featured Tensor"
+          style={{ borderRadius: '2rem', boxShadow: '0 4px 24px #ffd54f', width: '320px', maxWidth: '90%', marginBottom: '2rem' }}
         />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+          <Link href="/gallery" style={{ background: '#ffecb3', padding: '1rem 2rem', borderRadius: '1rem', textDecoration: 'none', color: '#6d4c00', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 2px 8px #ffd54f' }}>
+            Gallery
+          </Link>
+          <Link href="/stories" style={{ background: '#ffe082', padding: '1rem 2rem', borderRadius: '1rem', textDecoration: 'none', color: '#6d4c00', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 2px 8px #ffd54f' }}>
+            Stories & Tributes
+          </Link>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }

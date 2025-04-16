@@ -76,7 +76,7 @@ export default function Stories() {
   return (
     <main style={{ background: 'linear-gradient(135deg, #ffe082 0%, #ffd54f 100%)', minHeight: '100vh', color: '#6d4c00', padding: '2rem' }}>
       <h1 style={{ textAlign: 'center', fontFamily: 'Comic Sans MS, Comic Sans, cursive', fontSize: '2.5rem', marginBottom: '1rem' }}>Stories & Tributes</h1>
-      <p style={{ textAlign: 'center', marginBottom: '2rem' }}>Share your memories, photos, and videos of Tensor below.</p>
+      <p style={{ textAlign: 'center', marginBottom: '2rem' }}>Share your memories, photos, and videos of Tensor.</p>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem' }}>
         <Link href="/" style={{ background: '#ffecb3', padding: '0.7rem 1.5rem', borderRadius: '1rem', textDecoration: 'none', color: '#6d4c00', fontWeight: 'bold', fontSize: '1rem', boxShadow: '0 2px 8px #ffd54f' }}>
           Home

@@ -17,6 +17,9 @@ interface CloudinaryResource {
   version: number;
   type: string;
   created_at: string;
+  bytes: number;
+  width?: number;
+  height?: number;
 }
 
 interface CloudinaryResponse {
@@ -42,6 +45,8 @@ export async function GET(req: NextRequest) {
         type: 'upload',
         max_results: 500,
         next_cursor: nextCursor || undefined,
+        direction: 'desc',
+        ordering: 'created_at'
       }, (error, result) => {
         if (error) reject(error);
         else resolve(result as CloudinaryResponse);
@@ -56,18 +61,29 @@ export async function GET(req: NextRequest) {
         public_id: result.resources[0].public_id,
         resource_type: result.resources[0].resource_type,
         url: result.resources[0].secure_url,
+        created_at: result.resources[0].created_at,
+        bytes: result.resources[0].bytes,
+        width: result.resources[0].width,
+        height: result.resources[0].height
       } : null
     });
 
-    // Transform the response to match the expected format
+    // Transform the response to match the expected format and filter out invalid resources
     const transformedResult = {
       total: result.total_count,
       next_cursor: result.next_cursor,
-      resources: result.resources.map((resource: CloudinaryResource) => ({
-        ...resource,
-        secure_url: resource.secure_url || `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${resource.public_id}`,
-        resource_type: 'image'
-      }))
+      resources: result.resources
+        .filter((resource: CloudinaryResource) => {
+          // Filter out resources that are empty or too small
+          return resource.bytes > 0 && 
+                 (resource.width === undefined || resource.width > 10) &&
+                 (resource.height === undefined || resource.height > 10);
+        })
+        .map((resource: CloudinaryResource) => ({
+          ...resource,
+          secure_url: resource.secure_url || `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${resource.public_id}`,
+          resource_type: 'image'
+        }))
     };
 
     return NextResponse.json(transformedResult);

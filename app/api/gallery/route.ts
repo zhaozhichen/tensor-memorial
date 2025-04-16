@@ -46,17 +46,20 @@ function getMediaUrl(resource: CloudinaryResource): string {
 
 async function fetchResources(resourceType: 'image' | 'video', nextCursor?: string): Promise<CloudinaryResponse> {
   return new Promise((resolve, reject) => {
-    cloudinary.api.resources({
-      type: 'upload',
-      max_results: 500,
-      next_cursor: nextCursor,
-      direction: 'desc',
-      ordering: 'created_at',
-      resource_type: resourceType
-    }, (error, result) => {
-      if (error) reject(error);
-      else resolve(result as CloudinaryResponse);
-    });
+    cloudinary.search
+      .expression(`resource_type:${resourceType} AND folder:admin`)
+      .sort_by('created_at', 'desc')
+      .max_results(500)
+      .next_cursor(nextCursor)
+      .execute()
+      .then((result) => {
+        resolve({
+          resources: result.resources,
+          next_cursor: result.next_cursor,
+          total_count: result.total_count
+        } as CloudinaryResponse);
+      })
+      .catch((error) => reject(error));
   });
 }
 
@@ -77,25 +80,19 @@ export async function GET(req: NextRequest) {
       fetchResources('video', nextCursor || undefined)
     ]);
 
+    // Debug log the raw results
+    console.log('Raw results:', {
+      images: imagesResult.resources.length,
+      videos: videosResult.resources.length,
+      sampleImageId: imagesResult.resources[0]?.public_id,
+      sampleVideoId: videosResult.resources[0]?.public_id
+    });
+
     // Combine and sort resources by creation date
     const allResources = [
       ...imagesResult.resources.map(r => ({ ...r, resource_type: 'image' })),
       ...videosResult.resources.map(r => ({ ...r, resource_type: 'video' }))
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    console.log('Combined resources:', {
-      totalImages: imagesResult.resources.length,
-      totalVideos: videosResult.resources.length,
-      sampleResource: allResources[0] ? {
-        public_id: allResources[0].public_id,
-        resource_type: allResources[0].resource_type,
-        format: allResources[0].format,
-        created_at: allResources[0].created_at,
-        bytes: allResources[0].bytes,
-        width: allResources[0].width,
-        height: allResources[0].height
-      } : null
-    });
 
     // Transform and filter the combined resources
     const transformedResult = {
@@ -103,7 +100,7 @@ export async function GET(req: NextRequest) {
       next_cursor: imagesResult.next_cursor || videosResult.next_cursor,
       resources: allResources
         .filter((resource: CloudinaryResource) => {
-          // Filter out resources that are empty or too small
+          // Only filter out empty or too small resources
           return resource.bytes > 0 && 
                  (resource.width === undefined || resource.width > 10) &&
                  (resource.height === undefined || resource.height > 10);

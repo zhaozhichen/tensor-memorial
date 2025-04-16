@@ -28,6 +28,18 @@ interface CloudinaryResponse {
   total_count: number;
 }
 
+function getImageUrl(resource: CloudinaryResource): string {
+  const baseUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/`;
+  
+  // For HEIC images, convert to JPEG format
+  if (resource.format?.toLowerCase() === 'heic') {
+    return `${baseUrl}f_jpg,q_auto/${resource.public_id}.jpg`;
+  }
+  
+  // For other images, use auto format and quality
+  return `${baseUrl}f_auto,q_auto/${resource.public_id}.${resource.format}`;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -60,6 +72,7 @@ export async function GET(req: NextRequest) {
       sampleResource: result.resources?.[0] ? {
         public_id: result.resources[0].public_id,
         resource_type: result.resources[0].resource_type,
+        format: result.resources[0].format,
         url: result.resources[0].secure_url,
         created_at: result.resources[0].created_at,
         bytes: result.resources[0].bytes,
@@ -81,7 +94,7 @@ export async function GET(req: NextRequest) {
         })
         .map((resource: CloudinaryResource) => ({
           ...resource,
-          secure_url: resource.secure_url || `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${resource.public_id}`,
+          secure_url: getImageUrl(resource),
           resource_type: 'image'
         }))
     };

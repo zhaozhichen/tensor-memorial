@@ -28,16 +28,36 @@ interface CloudinaryResponse {
   total_count: number;
 }
 
-function getImageUrl(resource: CloudinaryResource): string {
-  const baseUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/`;
+function getMediaUrl(resource: CloudinaryResource): string {
+  const baseUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}`;
   
-  // For HEIC images, convert to JPEG format
-  if (resource.format?.toLowerCase() === 'heic') {
-    return `${baseUrl}f_jpg,q_auto/${resource.public_id}.jpg`;
+  // Handle videos
+  if (resource.resource_type === 'video') {
+    return `${baseUrl}/video/upload/q_auto/${resource.public_id}.${resource.format}`;
   }
   
-  // For other images, use auto format and quality
-  return `${baseUrl}f_auto,q_auto/${resource.public_id}.${resource.format}`;
+  // Handle images
+  if (resource.format?.toLowerCase() === 'heic') {
+    return `${baseUrl}/image/upload/f_jpg,q_auto/${resource.public_id}.jpg`;
+  }
+  
+  return `${baseUrl}/image/upload/f_auto,q_auto/${resource.public_id}.${resource.format}`;
+}
+
+async function fetchResources(resourceType: 'image' | 'video', nextCursor?: string): Promise<CloudinaryResponse> {
+  return new Promise((resolve, reject) => {
+    cloudinary.api.resources({
+      type: 'upload',
+      max_results: 500,
+      next_cursor: nextCursor,
+      direction: 'desc',
+      ordering: 'created_at',
+      resource_type: resourceType
+    }, (error, result) => {
+      if (error) reject(error);
+      else resolve(result as CloudinaryResponse);
+    });
+  });
 }
 
 export async function GET(req: NextRequest) {
@@ -51,41 +71,37 @@ export async function GET(req: NextRequest) {
       hasApiSecret: !!process.env.CLOUDINARY_API_SECRET
     });
 
-    // Use resources.list instead of search API
-    const result = await new Promise<CloudinaryResponse>((resolve, reject) => {
-      cloudinary.api.resources({
-        type: 'upload',
-        max_results: 500,
-        next_cursor: nextCursor || undefined,
-        direction: 'desc',
-        ordering: 'created_at'
-      }, (error, result) => {
-        if (error) reject(error);
-        else resolve(result as CloudinaryResponse);
-      });
-    });
+    // Fetch both images and videos
+    const [imagesResult, videosResult] = await Promise.all([
+      fetchResources('image', nextCursor || undefined),
+      fetchResources('video', nextCursor || undefined)
+    ]);
 
-    console.log('Cloudinary response:', {
-      total: result.total_count,
-      nextCursor: result.next_cursor,
-      resourceCount: result.resources?.length,
-      sampleResource: result.resources?.[0] ? {
-        public_id: result.resources[0].public_id,
-        resource_type: result.resources[0].resource_type,
-        format: result.resources[0].format,
-        url: result.resources[0].secure_url,
-        created_at: result.resources[0].created_at,
-        bytes: result.resources[0].bytes,
-        width: result.resources[0].width,
-        height: result.resources[0].height
+    // Combine and sort resources by creation date
+    const allResources = [
+      ...imagesResult.resources.map(r => ({ ...r, resource_type: 'image' })),
+      ...videosResult.resources.map(r => ({ ...r, resource_type: 'video' }))
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    console.log('Combined resources:', {
+      totalImages: imagesResult.resources.length,
+      totalVideos: videosResult.resources.length,
+      sampleResource: allResources[0] ? {
+        public_id: allResources[0].public_id,
+        resource_type: allResources[0].resource_type,
+        format: allResources[0].format,
+        created_at: allResources[0].created_at,
+        bytes: allResources[0].bytes,
+        width: allResources[0].width,
+        height: allResources[0].height
       } : null
     });
 
-    // Transform the response to match the expected format and filter out invalid resources
+    // Transform and filter the combined resources
     const transformedResult = {
-      total: result.total_count,
-      next_cursor: result.next_cursor,
-      resources: result.resources
+      total: allResources.length,
+      next_cursor: imagesResult.next_cursor || videosResult.next_cursor,
+      resources: allResources
         .filter((resource: CloudinaryResource) => {
           // Filter out resources that are empty or too small
           return resource.bytes > 0 && 
@@ -94,8 +110,7 @@ export async function GET(req: NextRequest) {
         })
         .map((resource: CloudinaryResource) => ({
           ...resource,
-          secure_url: getImageUrl(resource),
-          resource_type: 'image'
+          secure_url: getMediaUrl(resource)
         }))
     };
 

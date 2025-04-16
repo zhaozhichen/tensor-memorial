@@ -17,9 +17,9 @@ body {
 }
 
 body {
+  font-family: var(--font-comic-neue), 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
   background: linear-gradient(135deg, #ffe082 0%, #ffd54f 100%);
   color: #6d4c00;
-  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
   margin: 0;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

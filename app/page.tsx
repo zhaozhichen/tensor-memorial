@@ -7,7 +7,7 @@ export default function Home() {
       <div style={{ textAlign: 'center', padding: '2rem' }}>
         <h1 style={{ fontFamily: 'Comic Sans MS, Comic Sans, cursive', fontSize: '3rem', marginBottom: '1rem' }}>Remembering Tensor</h1>
         <p style={{ fontSize: '1.3rem', marginBottom: '2rem' }}>
-          2018.06.05-2025.04.15
+          2018.06.05 - 2025.04.15
         </p>
         <img
           src="/family.jpg"

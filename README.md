@@ -2,6 +2,8 @@
 
 A beautiful, playful memorial website to celebrate and share memories of Tensor, the golden retriever. Friends and family can share stories, photos, and videos.
 
+🌟 **Visit the website: [tensor-memorial.vercel.app](https://tensor-memorial.vercel.app/)**
+
 ## Features
 - Gallery of admin-uploaded photos and videos
 - Stories & Tributes page for friends to share memories (with or without media)
